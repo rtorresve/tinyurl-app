@@ -87,13 +87,11 @@ tiny-url-app/
 │   │   │           └── utils/              # Clases de utilidad y funciones auxiliares
 │   │   └── resources/                      # Configuración de la app
 │   ├── test/
-│   │   ├── groovy/
+│   │   ├── java/
 │   │   │   └── com/
 │   │   │       └── tinyurl/
-│   │   │           ├── application/
-│   │   │           │   └── service/        # Pruebas de la capa de aplicación
 │   │   │           ├── domain/             # Pruebas de la lógica de dominio
-│   │   │           └── repository/
+│   │   │           └── controller/         # Pruebas de las peticiones y respuestas de la aplicación
 ├── docker-compose.yml                      # Docker Compose para desplegar la propuesta
 ├── Dockerfile                              # Dockerfile para la app
 └── pom.xml                                 # Maven
