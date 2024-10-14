@@ -3,13 +3,17 @@ package com.tinyurl.domain.usecase;
 import java.util.Random;
 
 import com.tinyurl.domain.model.Url;
+import com.tinyurl.domain.repository.RedisUrlRepository;
 import com.tinyurl.domain.repository.UrlRepository;
 
 public class CreateShortUrlUseCase {
-    private final UrlRepository urlRepository;
 
-    public CreateShortUrlUseCase(UrlRepository urlRepository) {
+    private final UrlRepository urlRepository;
+    private final RedisUrlRepository redisUrlRepository;
+
+    public CreateShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository) {
         this.urlRepository = urlRepository;
+        this.redisUrlRepository = redisUrlRepository;
     }
 
     public Url createShortUrl(String longUrl) {
@@ -23,6 +27,7 @@ public class CreateShortUrlUseCase {
 
         // Save the Url in the repository
         urlRepository.save(url);
+        redisUrlRepository.saveUrl(shortUrl, longUrl);
 
         return url;
     }
