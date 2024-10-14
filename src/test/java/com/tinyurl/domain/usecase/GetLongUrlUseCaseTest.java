@@ -1,6 +1,7 @@
 package com.tinyurl.domain.usecase;
 
 import com.tinyurl.domain.model.Url;
+import com.tinyurl.domain.repository.RedisUrlRepository;
 import com.tinyurl.domain.repository.UrlRepository;
 import com.tinyurl.exceptions.UrlNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,9 @@ class GetLongUrlUseCaseTest {
     @Mock
     private UrlRepository urlRepository;
 
+    @Mock
+    private RedisUrlRepository redisUrlRepository;
+
     @InjectMocks
     private GetLongUrlUseCase getLongUrlUseCase;
 
@@ -27,7 +31,7 @@ class GetLongUrlUseCaseTest {
 
     @Test
     void testGetLongUrlSuccess() {
-        String shortUrl = "shortUrlExample";
+        String shortUrl = "short12";
         String longUrl = "http://example.com/long-url";
         Url url = new Url(shortUrl, longUrl);
 
@@ -37,11 +41,12 @@ class GetLongUrlUseCaseTest {
 
         assertEquals(longUrl, result);
         verify(urlRepository, times(1)).findByShortUrl(shortUrl);
+        verify(redisUrlRepository, times(1)).getUrl(shortUrl);
     }
 
     @Test
     void testGetLongUrlNotFound() {
-        String shortUrl = "shortUrlExample";
+        String shortUrl = "short12";
 
         when(urlRepository.findByShortUrl(shortUrl)).thenReturn(null);
 
@@ -50,5 +55,6 @@ class GetLongUrlUseCaseTest {
         });
 
         verify(urlRepository, times(1)).findByShortUrl(shortUrl);
+        verify(redisUrlRepository, times(1)).getUrl(shortUrl);
     }
 }

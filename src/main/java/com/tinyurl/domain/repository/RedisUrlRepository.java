@@ -21,7 +21,6 @@ public class RedisUrlRepository {
     }
 
     public void saveUrl(Url url) {
-        ValueOperations<String, String> ops = redisTemplate.opsForValue();
         this.saveUrl(url.getShortUrl(), url.getLongUrl());
     }
 
