@@ -13,6 +13,7 @@ import com.tinyurl.domain.model.Url;
 import com.tinyurl.domain.repository.RedisUrlRepository;
 import com.tinyurl.domain.repository.UrlRepository;
 import com.tinyurl.exceptions.ShortUrlCreationException;
+import com.tinyurl.infraestructure.config.ZooKeeperConfig;
 
 import jakarta.annotation.PostConstruct;
 
@@ -20,39 +21,27 @@ public class CreateShortUrlUseCase {
 
     private final UrlRepository urlRepository;
     private final RedisUrlRepository redisUrlRepository;
-    @Value("${zookeeper.connection}")
-    private String zookeeperConnection;
-    @Value("${feature.zookeeper.enabled}")
-    private boolean zookeeperEnabled;
-    @Value("${zookeeper.sessionTimeout}")
-    private Integer sessionTimeout;
+    private ZooKeeperConfig zooKeeperConfig;
+
     @Value("${zookeeper.basepath}")
     private String zookeeperBasePath;
 
-    private ZooKeeper zooKeeper;
-
-    @PostConstruct
-    public void init() throws RuntimeException {
-        try {
-            System.setProperty("zookeeper.sasl.client", "false");
-            zooKeeper = new ZooKeeper(zookeeperConnection, sessionTimeout, null);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not connect to ZooKeeper");
-        }
-    }
-
-    public CreateShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository, ZooKeeper zooKeeper) {
+    public CreateShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository, ZooKeeperConfig zooKeeperConfig) {
         this.urlRepository = urlRepository;
         this.redisUrlRepository = redisUrlRepository;
-        this.zooKeeper = zooKeeper;
+        this.zooKeeperConfig = zooKeeperConfig;
     }
 
     public Url createShortUrl(String longUrl) throws ShortUrlCreationException {
         // Generate a 7-character alphanumeric hash
         String shortUrl = generateShortUrl();
 
-        if (zookeeperEnabled) {
-            shortUrl = handleZooKeeper(shortUrl, longUrl);
+        try {
+            if (zooKeeperConfig.zooKeeper() != null) {
+                shortUrl = handleZooKeeper(shortUrl, longUrl);
+            }
+        } catch (IOException e) {
+            throw new ShortUrlCreationException("I/O error", e);
         }
 
         // Create Url object with the long and short URLs
@@ -73,11 +62,11 @@ public class CreateShortUrlUseCase {
         String path = zookeeperBasePath + "/" + shortUrl;
         while (retryCount < maxRetries) {
             try {
-                if (zooKeeper.exists(zookeeperBasePath, false) == null) {
-                    zooKeeper.create(zookeeperBasePath, zookeeperBasePath.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                if (zooKeeperConfig.zooKeeper().exists(zookeeperBasePath, false) == null) {
+                    zooKeeperConfig.zooKeeper().create(zookeeperBasePath, zookeeperBasePath.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                 }
-                if (zooKeeper.exists(path, false) == null) {
-                    zooKeeper.create(path, longUrl.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                if (zooKeeperConfig.zooKeeper().exists(path, false) == null) {
+                    zooKeeperConfig.zooKeeper().create(path, longUrl.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                     break;
                 } else {
                     shortUrl = generateShortUrl();
@@ -95,6 +84,8 @@ public class CreateShortUrlUseCase {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new ShortUrlCreationException("Thread interrupted", e);
+            } catch (IOException e) {
+                throw new ShortUrlCreationException("I/O error", e);
             }
         }
         if (retryCount == maxRetries) {

@@ -8,13 +8,14 @@ import com.tinyurl.domain.repository.RedisUrlRepository;
 import com.tinyurl.domain.repository.UrlRepository;
 import com.tinyurl.domain.usecase.CreateShortUrlUseCase;
 import com.tinyurl.domain.usecase.GetLongUrlUseCase;
+import com.tinyurl.infraestructure.config.ZooKeeperConfig;
 
 @Configuration
 public class UseCaseConfig {
 
     @Bean
-    public CreateShortUrlUseCase createShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository, ZooKeeper zooKeeper) {
-        return new CreateShortUrlUseCase(urlRepository, redisUrlRepository, zooKeeper);
+    public CreateShortUrlUseCase createShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository, ZooKeeperConfig zooKeeperConfig) {
+        return new CreateShortUrlUseCase(urlRepository, redisUrlRepository, zooKeeperConfig);
     }
 
     @Bean

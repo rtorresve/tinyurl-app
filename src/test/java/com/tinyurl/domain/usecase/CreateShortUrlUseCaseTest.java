@@ -1,14 +1,12 @@
 package com.tinyurl.domain.usecase;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.IOException;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -17,14 +15,16 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.TestPropertySource;
 
 import com.tinyurl.domain.model.Url;
 import com.tinyurl.domain.repository.RedisUrlRepository;
 import com.tinyurl.domain.repository.UrlRepository;
 import com.tinyurl.exceptions.ShortUrlCreationException;
+import com.tinyurl.infraestructure.config.ZooKeeperConfig;
 
 
 @TestPropertySource(properties = {
@@ -32,27 +32,36 @@ import com.tinyurl.exceptions.ShortUrlCreationException;
 })
 public class CreateShortUrlUseCaseTest {
 
-    private CreateShortUrlUseCase createShortUrlUseCase;
-    private ZooKeeper zooKeeper;
+    @Mock
     private UrlRepository urlRepository;
+
+    @Mock
     private RedisUrlRepository redisUrlRepository;
+
+    @Mock
+    private ZooKeeperConfig zooKeeperConfig;
+
+    @Mock
+    private ZooKeeper zooKeeper;
+
+    @InjectMocks
+    private CreateShortUrlUseCase createShortUrlUseCase;
 
     @BeforeEach
     public void setUp() {
-        zooKeeper = mock(ZooKeeper.class);
-        urlRepository = mock(UrlRepository.class);
-        redisUrlRepository = mock(RedisUrlRepository.class);
-        createShortUrlUseCase = new CreateShortUrlUseCase(urlRepository, redisUrlRepository, zooKeeper);
+        MockitoAnnotations.openMocks(this);
+        createShortUrlUseCase = new CreateShortUrlUseCase(urlRepository, redisUrlRepository, zooKeeperConfig);
     }
 
+
     @Test
-    public void testCreateShortUrlSuccess() throws KeeperException, InterruptedException, ShortUrlCreationException {
+    public void testCreateShortUrlSuccess() throws KeeperException, InterruptedException, ShortUrlCreationException, IOException {
         String longUrl = "http://example.com";
         String shortUrl = "abc1234";
         String path = "/urls/" + shortUrl;
 
         when(zooKeeper.exists(path, false)).thenReturn(null);
-        when(zooKeeper.create(path, longUrl.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)).thenReturn(path);
+        when(zooKeeper.create(path, shortUrl.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)).thenReturn(path);
 
         Url url = createShortUrlUseCase.createShortUrl(longUrl);
 
@@ -64,7 +73,7 @@ public class CreateShortUrlUseCaseTest {
     }
 
     @Test
-    public void testCreateShortUrlCollision() throws KeeperException, InterruptedException, ShortUrlCreationException {
+    public void testCreateShortUrlCollision() throws KeeperException, InterruptedException, ShortUrlCreationException, IOException {
         String longUrl = "http://example.com";
         String shortUrl1 = "abc1234";
         String shortUrl2 = "def5678";
