@@ -3,9 +3,14 @@ version: '3.8'
 services:
   tinyurl-app:
     build: .
-    container_name: tinyurl-app
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: 256M
     ports:
-      - "8080:8080"
+      - "8080"
     environment:
       ZOOKEEPER_CONNECTION: "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"
       REDIS_HOST: redis
@@ -16,7 +21,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: admin123
     volumes:
       - ./logs:/app/logs
-      - ./docker/resources/application.properties:/app/application.properties
+      - ./docker/application/resources/application.properties:/app/application.properties:ro
     depends_on:
       - zookeeper-1
       - zookeeper-2
@@ -25,6 +30,7 @@ services:
       - redis
     networks:
       - tinyurl-net
+    restart: always
   
   mariadb:
     image: mariadb:10.4.12
@@ -37,10 +43,11 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - .data/mysql:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
     networks:
       - tinyurl-net
     command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]
+    restart: always
   
   redis:
     image: redis:6.2
@@ -51,6 +58,7 @@ services:
       - redis_data:/data
     networks:
       - tinyurl-net
+    restart: always
 
   zookeeper-1:
     image: zookeeper:3.7
@@ -60,7 +68,7 @@ services:
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
       ZOO_MY_ID: 1
-      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2182 server.3=zookeeper-3:2888:3888;2183
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181
       ZOO_TICK_TIME: 2000
       ZOO_INIT_LIMIT: 10
       ZOO_SYNC_LIMIT: 5
@@ -69,16 +77,15 @@ services:
       - zookeeper1_datalog:/datalog
     networks:
       - tinyurl-net
+    restart: always
   
   zookeeper-2:
     image: zookeeper:3.7
     container_name: zookeeper-2
-    ports:
-      - "21812:2181"
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
       ZOO_MY_ID: 2
-      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2182 server.3=zookeeper-3:2888:3888;2183
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181
       ZOO_TICK_TIME: 2000
       ZOO_INIT_LIMIT: 10
       ZOO_SYNC_LIMIT: 5
@@ -87,16 +94,15 @@ services:
       - zookeeper2_datalog:/datalog
     networks:
       - tinyurl-net
+    restart: always
 
   zookeeper-3:
     image: zookeeper:3.7
     container_name: zookeeper-3
-    ports:
-      - "21813:2181"
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
       ZOO_MY_ID: 3
-      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2182 server.3=zookeeper-3:2888:3888;2183
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2181 server.3=zookeeper-3:2888:3888;2181
       ZOO_TICK_TIME: 2000
       ZOO_INIT_LIMIT: 10
       ZOO_SYNC_LIMIT: 5
@@ -105,6 +111,20 @@ services:
       - zookeeper3_datalog:/datalog
     networks:
       - tinyurl-net
+    restart: always
+  
+  haproxy:
+    image: haproxy:3.0.5-alpine3.20
+    volumes:
+      - ./docker/haproxy/config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "80:80"
+      - "8404:8404"
+    depends_on:
+      - tinyurl-app
+    networks:
+      - tinyurl-net
+    restart: always
 
 networks:
   tinyurl-net:
