@@ -11,8 +11,84 @@ services:
       MYSQL_PASSWORD: tiny_pass
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - tinyurl-net
   
   redis:
     image: redis:6.2
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - tinyurl-net
+
+  zookeeper-1:
+    image: zookeeper:3.7
+    container_name: zookeeper-1
+    ports:
+      - "21811:2181"
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2182 server.3=zookeeper-3:2888:3888;2183
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+    volumes:
+      - zookeeper1_data:/data
+      - zookeeper1_datalog:/datalog
+    networks:
+      - tinyurl-net
+  
+  zookeeper-2:
+    image: zookeeper:3.7
+    container_name: zookeeper-2
+    ports:
+      - "21812:2181"
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2182 server.3=zookeeper-3:2888:3888;2183
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+    volumes:
+      - zookeeper2_data:/data
+      - zookeeper2_datalog:/datalog
+    networks:
+      - tinyurl-net
+
+  zookeeper-3:
+    image: zookeeper:3.7
+    container_name: zookeeper-3
+    ports:
+      - "21813:2181"
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zookeeper-1:2888:3888;2181 server.2=zookeeper-2:2888:3888;2182 server.3=zookeeper-3:2888:3888;2183
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+    volumes:
+      - zookeeper3_data:/data
+      - zookeeper3_datalog:/datalog
+    networks:
+      - tinyurl-net
+
+networks:
+  tinyurl-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  zookeeper1_data:
+  zookeeper1_datalog:
+  zookeeper2_data:
+  zookeeper2_datalog:
+  zookeeper3_data:
+  zookeeper3_datalog:
