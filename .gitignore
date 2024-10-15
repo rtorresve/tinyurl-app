@@ -44,4 +44,5 @@ target/*
 .idea/*
 .vscode/*
 data/*
+.data/*
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,sonarqube

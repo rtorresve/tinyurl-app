@@ -1,23 +1,50 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:latest
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: admin123
-      MYSQL_DATABASE: tiny_db
-      MYSQL_USER: tiny
-      MYSQL_PASSWORD: tiny_pass
+  tinyurl-app:
+    build: .
+    container_name: tinyurl-app
     ports:
-      - "3306:3306"
+      - "8080:8080"
+    environment:
+      ZOOKEEPER_CONNECTION: "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181"
+      REDIS_HOST: redis
+      HIBERNATE_DIALECT: org.hibernate.dialect.MariaDBDialect
+      HIBERNATE_DRIVER: org.mariadb.jdbc.Driver
+      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb:3306/tinyurl_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: admin123
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./logs:/app/logs
+      - ./docker/resources/application.properties:/app/application.properties
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+      - mariadb
+      - redis
     networks:
       - tinyurl-net
   
+  mariadb:
+    image: mariadb:10.4.12
+    container_name: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin123
+      - MYSQL_USER=tinyurl
+      - MYSQL_PASSWORD=tiny123
+      - MYSQL_DATABASE=tinyurl_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - .data/mysql:/var/lib/mysql
+    networks:
+      - tinyurl-net
+    command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]
+  
   redis:
     image: redis:6.2
+    container_name: redis
     ports:
       - "6379:6379"
     volumes:
@@ -84,7 +111,7 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
+  mariadb_data:
   redis_data:
   zookeeper1_data:
   zookeeper1_datalog:
