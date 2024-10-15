@@ -1,5 +1,6 @@
 package com.tinyurl.domain.config;
 
+import org.apache.zookeeper.ZooKeeper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +13,8 @@ import com.tinyurl.domain.usecase.GetLongUrlUseCase;
 public class UseCaseConfig {
 
     @Bean
-    public CreateShortUrlUseCase createShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository) {
-        return new CreateShortUrlUseCase(urlRepository, redisUrlRepository);
+    public CreateShortUrlUseCase createShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository, ZooKeeper zooKeeper) {
+        return new CreateShortUrlUseCase(urlRepository, redisUrlRepository, zooKeeper);
     }
 
     @Bean

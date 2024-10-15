@@ -43,4 +43,5 @@ replay_pid*
 target/*
 .idea/*
 .vscode/*
+data/*
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,sonarqube

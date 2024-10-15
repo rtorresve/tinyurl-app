@@ -1,7 +1,9 @@
 package com.tinyurl.controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
+import org.apache.zookeeper.KeeperException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import com.tinyurl.domain.model.Url;
 import com.tinyurl.domain.usecase.CreateShortUrlUseCase;
 import com.tinyurl.domain.usecase.GetLongUrlUseCase;
+import com.tinyurl.exceptions.ErrorDetails;
+import com.tinyurl.exceptions.ShortUrlCreationException;
 import com.tinyurl.exceptions.UrlNotFoundException;
 import com.tinyurl.utils.UrlRequest;
 
@@ -27,8 +31,18 @@ public class UrlController {
     }
 
     @PostMapping("/create-url")
-    public ResponseEntity<Url> createUrl(@RequestBody UrlRequest request) {
-        Url shortUrl = createShortUrlUseCase.createShortUrl(request.getUrl());
+    public ResponseEntity<?> createUrl(@RequestBody UrlRequest request) {
+        Url shortUrl;
+        try {
+            shortUrl = createShortUrlUseCase.createShortUrl(request.getUrl());
+        } catch (ShortUrlCreationException e) {
+            ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                e.getMessage(),
+                null
+            );
+            return ResponseEntity.internalServerError().body(errorDetails);
+        }
         return ResponseEntity.ok(shortUrl);
     }
 
