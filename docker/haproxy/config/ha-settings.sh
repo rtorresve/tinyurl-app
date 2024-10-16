@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# Define the number of replicas
-if [ -n "$1" ]; then
-  NUM_REPLICAS=$1
+NUM_REPLICAS=${TINYURL_REPLICAS:-3}  # Default to 3 if not set
+DOCKER_COMPOSE_VERSION=$(docker-compose --version | awk '{print $3}' | sed 's/,//')
+
+version_lt() {
+    [ "$1" != "$2" ] && [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$1" ]
+}
+
+if version_lt "$DOCKER_COMPOSE_VERSION" "2.0.0"; then
+    SEPARATOR="_"
 else
-  NUM_REPLICAS=${NUM_REPLICAS:-3}  # Default to 3 if not set
+    SEPARATOR="-"
 fi
 
 # HAProxy configuration template
@@ -45,14 +51,14 @@ END
 # Generate server entries
 SERVER_ENTRIES=""
 for i in $(seq 1 $NUM_REPLICAS); do
-    SERVER_ENTRIES+="    server s${i} tinyurl-app-tinyurl-app-${i}:8080 check\n"
+    SERVER_ENTRIES+="    server s${i} tinyurl-app${SEPARATOR}tinyurl-app${SEPARATOR}${i}:8080 check\n"
 done
 
 # Combine the template and server entries
 HAPROXY_CONFIG="${HAPROXY_TEMPLATE}\n${SERVER_ENTRIES}"
 
 # Write the configuration to haproxy.cfg
-echo -e "$HAPROXY_CONFIG" > ./haproxy.cfg
+echo -e "$HAPROXY_CONFIG" > ./docker/haproxy/haproxy.cfg
 
 echo "haproxy.cfg generated successfully."
 

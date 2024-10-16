@@ -4,7 +4,7 @@ services:
   tinyurl-app:
     build: .
     deploy:
-      replicas: 3
+      replicas: ${TYNIURL_REPLICAS:-3}
       resources:
         limits:
           cpus: "0.3"
@@ -20,7 +20,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: admin123
     volumes:
-      - ./logs:/app/logs
+      - tiny_logs:/app/logs
       - ./docker/application/resources/application.properties:/app/application.properties:ro
     depends_on:
       - zookeeper-1
@@ -116,7 +116,7 @@ services:
   haproxy:
     image: haproxy:3.0.5-alpine3.20
     volumes:
-      - ./docker/haproxy/config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     ports:
       - "80:80"
       - "8404:8404"
@@ -139,3 +139,4 @@ volumes:
   zookeeper2_datalog:
   zookeeper3_data:
   zookeeper3_datalog:
+  tiny_logs:

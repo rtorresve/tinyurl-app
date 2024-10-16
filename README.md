@@ -97,4 +97,22 @@ tiny-url-app/
 └── pom.xml                                 # Maven
 ```
 
+## <U> Despliegue </U>
 
+Para desplegar el proyecto se agrego un archivo Makefile, que sirve para agilizar las tareas para la configuracion y despliegue del proyecto, vale la pena destacar que por defecto se despliegan 3 replicas de la **tinyurl-app**, sin embargo si desea cambiar el número de estas debe configurar la variable **TINYURL_REPLICAS** en su entorno local.
+
+```
+export TINYURL_REPLICAS=7
+```
+
+se deja una lista de los comandos incluidos en el makefile.
+
+```
+make build
+make up
+make run
+make test
+make clean-install
+make ha-setting
+make down
+```
