@@ -23,6 +23,9 @@ public class CreateShortUrlUseCase {
     @Value("${zookeeper.basepath}")
     private String zookeeperBasePath;
 
+    @Value("${tinyurl.domain:http://localhost:8080}")
+    private String tinyDomainString;
+
     public CreateShortUrlUseCase(UrlRepository urlRepository, RedisUrlRepository redisUrlRepository, ZooKeeperConfig zooKeeperConfig) {
         this.urlRepository = urlRepository;
         this.redisUrlRepository = redisUrlRepository;
@@ -49,7 +52,8 @@ public class CreateShortUrlUseCase {
         // Save the Url in the repository
         urlRepository.save(url);
         redisUrlRepository.saveUrl(shortUrl, longUrl);
-
+        String fullShortUrl = tinyDomainString + "/tiny/" + shortUrl;
+        url.setShortUrl(fullShortUrl);
         return url;
     }
 

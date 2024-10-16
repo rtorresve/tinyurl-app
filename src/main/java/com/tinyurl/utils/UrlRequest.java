@@ -1,5 +1,10 @@
 package com.tinyurl.utils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import com.tinyurl.exceptions.ShortUrlCreationException;
+
 public class UrlRequest {
     private String url;
 
@@ -10,5 +15,13 @@ public class UrlRequest {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public void validateUrl() throws ShortUrlCreationException {
+        try {
+            new URL(this.url);
+        } catch (MalformedURLException e) {
+            throw new ShortUrlCreationException("Invalid URL: " + url, e);
+        }
     }
 }

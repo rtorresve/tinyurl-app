@@ -16,9 +16,9 @@ import com.tinyurl.exceptions.ShortUrlCreationException;
 import com.tinyurl.exceptions.UrlNotFoundException;
 import com.tinyurl.utils.UrlRequest;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/tiny")
@@ -33,11 +33,15 @@ public class UrlController {
     }
 
     @Operation(summary = "Create a tiny url", description = "Return a Url object eith the long and shor url.")
-    @ApiResponse(responseCode = "200", description = "Success")
+    @ApiResponse(responseCode = "200", description = "Successfully created tiny url")
+    @ApiResponse(responseCode = "400", description = "Invalid input")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/create-url")
+    @CircuitBreaker(name = "createShortUrl", fallbackMethod = "fallbackCreateShortUrl")
     public ResponseEntity<?> createUrl(@RequestBody UrlRequest request) {
         Url shortUrl;
         try {
+            request.validateUrl();
             shortUrl = createShortUrlUseCase.createShortUrl(request.getUrl());
         } catch (ShortUrlCreationException e) {
             ErrorDetails errorDetails = new ErrorDetails(
@@ -63,6 +67,15 @@ public class UrlController {
             redirectView.setUrl("/error/404");
         }
         return redirectView;
+    }
+
+    public ResponseEntity<?> fallbackCreateShortUrl(UrlRequest request, Throwable t) {
+        ErrorDetails errorDetails = new ErrorDetails(
+            LocalDateTime.now(),
+            "Service is currently unavailable. Please try again later.",
+            t.getMessage()
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
 }

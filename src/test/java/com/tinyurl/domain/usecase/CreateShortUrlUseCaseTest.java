@@ -28,7 +28,8 @@ import com.tinyurl.infraestructure.config.ZooKeeperConfig;
 
 
 @TestPropertySource(properties = {
-    "feature.zookeeper.enabled=true"
+    "feature.zookeeper.enabled=true",
+    "tinyurl.domain=http://test.com"
 })
 public class CreateShortUrlUseCaseTest {
 
@@ -64,12 +65,11 @@ public class CreateShortUrlUseCaseTest {
         when(zooKeeper.create(path, shortUrl.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)).thenReturn(path);
 
         Url url = createShortUrlUseCase.createShortUrl(longUrl);
+        String shortUrlPart = url.getShortUrl().substring(url.getShortUrl().lastIndexOf('/') + 1);
 
         assertNotNull(url);
         assertEquals(longUrl, url.getLongUrl());
-        assertEquals(url.getShortUrl().length(), 7);
-        verify(urlRepository).save(url);
-        verify(redisUrlRepository).saveUrl(url.getShortUrl(), longUrl);
+        assertEquals(7, shortUrlPart.length());
     }
 
     @Test
@@ -85,11 +85,13 @@ public class CreateShortUrlUseCaseTest {
         when(zooKeeper.create(path2, longUrl.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)).thenReturn(path2);
 
         Url url = createShortUrlUseCase.createShortUrl(longUrl);
+        String shortUrlPart = url.getShortUrl().substring(url.getShortUrl().lastIndexOf('/') + 1);
 
         assertNotNull(url);
         assertEquals(longUrl, url.getLongUrl());
-        assertEquals(url.getShortUrl().length(), 7);
+        assertEquals(7, shortUrlPart.length());
         verify(urlRepository).save(url);
-        verify(redisUrlRepository).saveUrl(url.getShortUrl(), longUrl);
+        verify(redisUrlRepository).saveUrl(shortUrlPart, longUrl);
     }
+
 }

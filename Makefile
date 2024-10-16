@@ -1,4 +1,4 @@
-.PHONY: build up run-local test clean-install ha-setting down
+.PHONY: build up run-local test clean-install ha-setting down logs
 build:
 	docker-compose build
 
@@ -19,3 +19,6 @@ ha-setting:
 
 down:
 	docker-compose  down --volumes --rmi all
+
+logs:
+	docker-compose  logs -f
