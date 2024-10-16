@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class CustomErrorController implements ErrorController {
 
-    @RequestMapping("/error")
+    @RequestMapping("/error/404")
     public String handleError() {
         return "redirect:/404.html";
     }

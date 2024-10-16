@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
-import org.apache.zookeeper.ZooKeeper;
 import org.springframework.beans.factory.annotation.Value;
 import org.apache.zookeeper.KeeperException;
 
@@ -14,8 +13,6 @@ import com.tinyurl.domain.repository.RedisUrlRepository;
 import com.tinyurl.domain.repository.UrlRepository;
 import com.tinyurl.exceptions.ShortUrlCreationException;
 import com.tinyurl.infraestructure.config.ZooKeeperConfig;
-
-import jakarta.annotation.PostConstruct;
 
 public class CreateShortUrlUseCase {
 

@@ -7,10 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class UrlControllerTest {
@@ -30,26 +33,24 @@ class UrlControllerTest {
     void testGetLongUrlSuccess() throws IOException {
         String shortUrl = "shortUrlExample";
         String longUrl = "http://example.com/long-url";
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        RedirectView response;
 
         when(getLongUrlUseCase.getLongUrl(shortUrl)).thenReturn(longUrl);
 
-        urlController.getLongUrl(shortUrl, response);
+        response = urlController.getLongUrl(shortUrl);
 
-        verify(response, times(1)).sendRedirect(longUrl);
-        verify(getLongUrlUseCase, times(1)).getLongUrl(shortUrl);
+        assertEquals(longUrl, response.getUrl());
     }
 
     @Test
     void testGetLongUrlNotFound() throws IOException {
         String shortUrl = "shortUrlExample";
-        HttpServletResponse response = mock(HttpServletResponse.class);
+        RedirectView response;
 
         when(getLongUrlUseCase.getLongUrl(shortUrl)).thenThrow(new UrlNotFoundException("Short URL not found"));
 
-        urlController.getLongUrl(shortUrl, response);
+        response = urlController.getLongUrl(shortUrl);
 
-        verify(response, times(1)).sendError(HttpServletResponse.SC_NOT_FOUND, "Short URL not found");
-        verify(getLongUrlUseCase, times(1)).getLongUrl(shortUrl);
+        assertEquals("/error/404", response.getUrl());
     }
 }

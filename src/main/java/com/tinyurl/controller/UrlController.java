@@ -3,10 +3,10 @@ package com.tinyurl.controller;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import org.apache.zookeeper.KeeperException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.tinyurl.domain.model.Url;
 import com.tinyurl.domain.usecase.CreateShortUrlUseCase;
@@ -16,10 +16,12 @@ import com.tinyurl.exceptions.ShortUrlCreationException;
 import com.tinyurl.exceptions.UrlNotFoundException;
 import com.tinyurl.utils.UrlRequest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/tiny")
 public class UrlController {
 
     private final CreateShortUrlUseCase createShortUrlUseCase;
@@ -30,6 +32,8 @@ public class UrlController {
         this.getLongUrlUseCase = getLongUrlUseCase;
     }
 
+    @Operation(summary = "Create a tiny url", description = "Return a Url object eith the long and shor url.")
+    @ApiResponse(responseCode = "200", description = "Success")
     @PostMapping("/create-url")
     public ResponseEntity<?> createUrl(@RequestBody UrlRequest request) {
         Url shortUrl;
@@ -46,14 +50,19 @@ public class UrlController {
         return ResponseEntity.ok(shortUrl);
     }
 
+    @Operation(summary = "Receive a tiny url", description = "Redirect to real url.")
+    @ApiResponse(responseCode = "302", description = "Redirecto to original url.")
     @GetMapping("/{shortUrl}")
-    public void getLongUrl(@PathVariable String shortUrl, HttpServletResponse response) throws IOException {
+    public RedirectView getLongUrl(@PathVariable String shortUrl) {
+        RedirectView redirectView = new RedirectView();
         try {
             String longUrl = getLongUrlUseCase.getLongUrl(shortUrl);
-            response.sendRedirect(longUrl);
-        } catch (UrlNotFoundException | IOException e) {
-            response.sendError(HttpStatus.NOT_FOUND.value(), "Short URL not found");
+            redirectView.setStatusCode(HttpStatus.FOUND);
+            redirectView.setUrl(longUrl);
+        } catch (UrlNotFoundException e) {
+            redirectView.setUrl("/error/404");
         }
+        return redirectView;
     }
 
 }

@@ -1,6 +1,5 @@
 package com.tinyurl.domain.config;
 
-import org.apache.zookeeper.ZooKeeper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

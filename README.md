@@ -116,3 +116,10 @@ make clean-install
 make ha-setting
 make down
 ```
+
+## <U> Documentación </U>
+
+Para consultar las API disponibles puede dirigirce al swaguer del proyecto.
+
+http://localhost:8080/swagger-ui/index.html
+
