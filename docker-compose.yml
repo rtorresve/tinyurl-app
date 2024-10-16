@@ -4,7 +4,7 @@ services:
   tinyurl-app:
     build: .
     deploy:
-      replicas: ${TYNIURL_REPLICAS:-3}
+      replicas: ${TINYURL_REPLICAS:-3}
       resources:
         limits:
           cpus: "0.3"
