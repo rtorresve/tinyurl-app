@@ -137,7 +137,7 @@ services:
       DATABASE_USER: root
       DATABASE_PASSWOR: admin123
     ports:
-      - "8000:8000"
+      - "8000"
     networks:
       - tinyurl-net
     depends_on:
