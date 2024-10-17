@@ -171,7 +171,7 @@ El script para ejecutarlas se encuentra en la carpeta `bulk_test`
 
 ## <U> Documentación </U>
 
-Para consultar las API disponibles puede dirigirce al [swaguer](http://localhost/swagger-ui/index.html) del proyecto.
+Para consultar las API disponibles puede dirigirce al [swagger](http://localhost/swagger-ui/index.html) del proyecto.
 
 `{ruta_servidor}/swagger-ui/index.html`
 
