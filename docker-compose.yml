@@ -168,6 +168,17 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
       - tinyurl-net
+    restart: unless-stopped
+  
+  ab-test:
+    image: httpd:2.4
+    volumes:
+      - ./bulk_test:/bulk_test
+    working_dir: /bulk_test
+    networks:
+      - tinyurl-net
+    depends_on:
+      - haproxy
 
 networks:
   tinyurl-net:
