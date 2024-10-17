@@ -63,11 +63,6 @@ Este diagrama proporciona una visión general de alto nivel de la solución, mos
 
 **Interacción:** Recibe tráfico redirigido por HAProxy desde direcciones IP sospechosas.
 
-## SonarQube:
-
-**Descripción:** Plataforma de análisis de código para monitorear la calidad del código, la cobertura de pruebas y la mantenibilidad.
-
-**Interacción:** Evalúa el código fuente del servicio TinyURL para métricas de calidad.
 
 ## <U> Estructura del proyecto </U>
 
