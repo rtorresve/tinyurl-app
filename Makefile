@@ -1,4 +1,4 @@
-.PHONY: build up run-local test clean-install ha-setting down logs
+.PHONY: build up run-local test clean-install ha-setting down logs createsuperuser
 build:
 	docker-compose build
 
@@ -22,3 +22,7 @@ down:
 
 logs:
 	docker-compose  logs -f
+
+createsuperuser:
+	docker-compose run tinyurl_admin python manage.py migrate
+	docker-compose run tinyurl_admin python manage.py createsuperuser

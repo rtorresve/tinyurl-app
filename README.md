@@ -115,11 +115,21 @@ make test
 make clean-install
 make ha-setting
 make down
+make logs
+make createsuperuser
 ```
 
 ## <U> Documentación </U>
 
-Para consultar las API disponibles puede dirigirce al swaguer del proyecto.
+Para consultar las API disponibles puede dirigirce al [swaguer](http://localhost/swagger-ui/index.html) del proyecto.
 
-http://localhost:8080/swagger-ui/index.html
+`{ruta_servidor}/swagger-ui/index.html`
 
+
+## <u> Administración </u>
+
+Para habilitar la consola de administracion previamente debe ejecutar el comando.
+
+`make createsuperuser`
+
+Esto agregara las tabalas restantes de la base de datos y asignara el usuario junto a las credenciales necesarias para poder gestionar los datos del modelo.

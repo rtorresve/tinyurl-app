@@ -114,6 +114,7 @@ services:
     restart: always
   
   haproxy:
+    container_name: haproxy
     image: haproxy:3.0.5-alpine3.20
     volumes:
       - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
@@ -124,6 +125,23 @@ services:
       - tinyurl-app
     networks:
       - tinyurl-net
+    restart: always
+
+  tinyurl_admin:
+    container_name: tinyurl_admin
+    build: ./tinyurl_admin
+    environment:
+      DATABASE_NAME: tinyurl_db
+      DATABASE_HOST: mariadb
+      DATABASE_PORT: 3306
+      DATABASE_USER: root
+      DATABASE_PASSWOR: admin123
+    ports:
+      - "8000:8000"
+    networks:
+      - tinyurl-net
+    depends_on:
+      - mariadb
     restart: always
 
 networks:

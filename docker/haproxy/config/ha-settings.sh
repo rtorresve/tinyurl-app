@@ -39,7 +39,16 @@ frontend stats
 
 frontend http_front
     bind *:80
+    acl is_static path_beg /static/
+    use_backend admin_back if is_static
     default_backend http_back
+
+frontend admin_front
+    bind *:8000
+    default_backend admin_back
+
+backend admin_back
+    server admin tinyurl_admin:8000 check
 
 backend http_back
     balance leastconn
