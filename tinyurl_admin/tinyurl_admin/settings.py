@@ -26,7 +26,11 @@ SECRET_KEY = 'django-insecure-ak-1bowi4y1e+emr$$mhufms@@1oxt75&=lu40koc5qj8x@q31
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'infotor.online',
+]
 
 
 # Application definition
