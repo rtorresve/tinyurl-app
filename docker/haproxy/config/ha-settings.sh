@@ -37,10 +37,13 @@ frontend stats
   stats uri /
   stats refresh 10s
 
+
 frontend http_front
     bind *:80
     acl is_static path_beg /static/
+    acl is_admin path_beg /admin/
     use_backend admin_back if is_static
+    use_backend admin_back if is_admin
     default_backend http_back
 
 frontend admin_front
