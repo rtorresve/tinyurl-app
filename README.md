@@ -114,9 +114,11 @@ make run
 make test
 make clean-install
 make ha-setting
+make remove
 make down
 make logs
 make createsuperuser
+make restart
 ```
 
 ## <U> Documentación </U>

@@ -1,4 +1,4 @@
-.PHONY: build up run-local test clean-install ha-setting down logs createsuperuser
+.PHONY:
 build:
 	docker-compose build
 
@@ -17,11 +17,17 @@ clean-install:
 ha-setting:
 	./docker/haproxy/config/ha-settings.sh
 
-down:
+remove:
 	docker-compose  down --volumes --rmi all
 
+down:
+	docker-compose  down
+	
 logs:
 	docker-compose  logs -f
+
+restart:
+	docker-compose restart
 
 createsuperuser:
 	docker-compose run tinyurl_admin python manage.py migrate

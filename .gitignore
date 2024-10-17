@@ -45,6 +45,6 @@ target/*
 .vscode/*
 data/*
 .data/*
-docker/haproxy/*.cfg
+docker/haproxy/haproxy.cfg
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,sonarqube
 
