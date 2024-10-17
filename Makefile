@@ -17,6 +17,9 @@ clean-install:
 ha-setting:
 	./docker/haproxy/config/ha-settings.sh
 
+prometheus-setting:
+	./docker/prometheus/prometheus-settings.sh
+
 remove:
 	docker-compose  down --volumes --rmi all
 

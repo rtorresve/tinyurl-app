@@ -143,6 +143,31 @@ services:
     depends_on:
       - mariadb
     restart: always
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
+    volumes:
+      - ./docker/prometheus/config:/etc/prometheus
+      - prom_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - tinyurl-net
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - tinyurl-net
 
 networks:
   tinyurl-net:
@@ -158,3 +183,5 @@ volumes:
   zookeeper3_data:
   zookeeper3_datalog:
   tiny_logs:
+  grafana_data:
+  prom_data:
