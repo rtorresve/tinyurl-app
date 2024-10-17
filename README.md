@@ -33,17 +33,23 @@ Este diagrama proporciona una visión general de alto nivel de la solución, mos
 
 **Interacción:** Proporciona recuperación rápida de URLs desde la caché.
 
-## Cassandra:
+## MariaDB:
 
 **Descripción:** Base de datos para el almacenamiento persistente de URLs.
 
 **Interacción:** Almacena registros de URLs para uso a largo plazo.
 
-## ELK Stack (Elasticsearch, Logstash, Kibana):
+## Prometheus:
 
-**Descripción:** Registra, analiza y monitorea todas las actividades de la aplicación.
+**Descripción:** Registra el estado y trafico de los servicios de tinyurl-app.
 
-**Interacción:** Recoge registros del servicio TinyURL para su visualización en Kibana.
+**Interacción:** Recoge registros del servicio TinyURL para su visualización en Grafana.
+
+## Grafana:
+
+**Descripción:** Herramienta para visualizar el estado de los servicios.
+
+**Interacción:** Recoge los datos de Prometheus para construir dashboard y alertas.
 
 ## Circuit Breaker:
 
@@ -67,7 +73,7 @@ Este diagrama proporciona una visión general de alto nivel de la solución, mos
 
 Se plantea construir el servicio usando los principios de arquitecturas limpias.
 
-```
+```sh
 tiny-url-app/
 │
 ├── src/
@@ -101,13 +107,13 @@ tiny-url-app/
 
 Para desplegar el proyecto se agrego un archivo Makefile, que sirve para agilizar las tareas para la configuracion y despliegue del proyecto, vale la pena destacar que por defecto se despliegan 3 replicas de la **tinyurl-app**, sin embargo si desea cambiar el número de estas debe configurar la variable **TINYURL_REPLICAS** en su entorno local.
 
-```
+```sh
 export TINYURL_REPLICAS=7
 ```
 
 se deja una lista de los comandos incluidos en el makefile.
 
-```
+```sh
 make build
 make up
 make run
@@ -120,6 +126,53 @@ make logs
 make createsuperuser
 make restart
 ```
+
+1. Clonamos el repositorio.
+ ```sh
+ git clone https://github.com/rtorresve/tinyurl-app.git
+ cd tinyurl-app
+ ```
+
+2. Asignamos las variables de entorno con las replicas que consideremos necesarias.
+```sh
+export TINYURL_REPLICAS=3
+```
+
+3. Creamos los archivos de configuracion para prometheus y HaProxy
+```sh
+make ha-setting
+make prometheus-setting 
+```
+
+4. Procedemos a construir las imagenes:
+```sh
+make build 
+```
+
+5. Procedemos a levantar el proyecto:
+```sh
+make up
+```
+
+6. Para activar la aplicacion de administracion de los registros, necesitamos crear el superusuario, al mismo tiempo inicializara los modelos de base de datos necesarios para desplegar esta, luego reiniciamos las instancias para corregir el redireccionamiento de algunos servicios como el HAPROXY
+```sh
+make createsuperuser
+make restart
+```
+
+7. Una vez desplegado el proyecto podemos acceder a los dashboard habilitados, para fines del ejercicio el dominio utilizado es `infotor.online` pero puede reemplazarlo por el del host donde se despliegue la aplicación o por **localhost** 
+
+* Para acceder al dashboard del balanceador http://www.infotor.online:8404
+* La consola de administración del modelo de datos esta disponible en https://infotor.online/admin/
+* El cliente de swagger a través de http://infotor.online/swagger-ui/index.html
+* Las consultas del Prometheus a través de http://infotor.online:9090/
+* Los dashboard del grafana pueden consultarse en http://infotor.online:3000 (ver las credenciales que se definieron en el archivo docker-compose.yml)
+
+8. Para ejecutar pruebas de estres se uso Apache Benchmark, puede user la imagen incluida en el docker-compose.yml **ab-test** o descargarlo en su host, para pc con sistemas gnu/linux puede ejecutar
+```sh
+sudo apt-get install apache2-utils
+```
+El script para ejecutarlas se encuentra en la carpeta `bulk_test`
 
 ## <U> Documentación </U>
 
